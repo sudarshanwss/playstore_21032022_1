@@ -574,7 +574,32 @@ public function getMatchingPlayer($waitingRoomId, $userId,  $levelId, $relics, $
     $result = database::doSelect($sql, array('userId' => $userId));
     return $result;
   }
+  public function getBattleHistResultByUser($userId, $roomId, $options=array())
+  {
+    $sql = "SELECT count(*) 
+            FROM battle_history 
+            WHERE user_id=:userId AND room_id=:roomId";
 
+    $result = database::doSelect($sql, array('userId' => $userId, 'roomId' => $roomId));
+    return $result;
+  }
+  public function getBattleHistResultByOppUser($userId, $roomId, $options=array())
+  {
+    $sql = "SELECT count(*) 
+            FROM battle_history 
+            WHERE opponent_id=:userId AND room_id=:roomId";
+
+    $result = database::doSelect($sql, array('userId' => $userId, 'roomId' => $roomId));
+    return $result;
+  }
+  public function deleteAllBattleHistoryByRoomAndUser($userId, $opponentId, $roomId, $options=array())
+  {
+    $sql = "DELETE FROM battle_history
+            WHERE user_id = :userId AND opponent_id =:opponentId AND room_id=:roomId";
+
+	  $result = database::doDelete($sql, array('userId'=>$userId, 'opponentId'=>$opponentId, 'roomId' =>$roomId));
+    return $result;
+  }
   public function getPreviousWaitingRoomDetail($userId, $roomId, $options=array())
   {
     $sql = "SELECT *

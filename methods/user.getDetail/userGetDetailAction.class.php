@@ -261,12 +261,12 @@ class userGetDetailAction extends baseAction{
         $result['ios_update'] = true;
       }
     }else{
-      $result['android_update'] = false;
-      $result['ios_update'] = false;
+      $result['android_update'] = true;
+      $result['ios_update'] = true;
     }
     //$result['updatedurl'] = "Share Links \n iOS=https://apps.apple.com/gb/app/epiko-regal/id1576311776 \n Android=Coming Soon";
     $result['editname_cost'] = 500;
-    $result['android_updatedurl']="Share Links \n  Android=Coming Soon";
+    $result['android_updatedurl']="https://play.google.com/store/apps/details?id=com.wss.epikoregal";
     $result['ios_updatedurl']= "Share Links \n iOS=https://apps.apple.com/gb/app/epiko-regal/id1576311776";
     $result['invite_baseurl']="https://epikoregal.com/";
     $result['invite_prefixurl']="friendlybattle.page.link";

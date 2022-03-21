@@ -34,6 +34,7 @@ class userBattleHistoryDetailsAction extends baseAction{
     $aiLib = autoload::loadLibrary('queryLib', 'ai');
     $userLib = autoload::loadLibrary('queryLib', 'user');
     $kingdomLib = autoload::loadLibrary('queryLib', 'kingdom');
+    $rewardLib = autoload::loadLibrary('queryLib', 'reward');
     date_default_timezone_set('Asia/Kolkata');
     $result = $users = array();
     $remainingTime = 0;
@@ -42,8 +43,31 @@ class userBattleHistoryDetailsAction extends baseAction{
     $temp = array();
     foreach ($battleHist as $bhList) {
         if(!empty($bhList['room_id'])){
-          $userTrophies = $roomLib->getMatchPlayersTrophies($bhList['user_winstatus'], $bhList['user_stadium']);
-          $opponentTrophies = $roomLib->getMatchPlayersTrophies($bhList['opponent_winstatus'], $bhList['opp_stadium']);
+
+          $matchStatusRewardBattleHist = $rewardLib->getMasterMatchStatusRewardForStadiumByTower($bhList['user_winstatus'], $bhList['opponent_circlet'], $bhList['user_stadium']);
+          if(empty($matchStatusRewardBattleHist) || $matchStatusRewardBattleHist == ""){
+            $msId=$rewardLib->getMaxStadiumIdMasterMatchStatusRewardForStadium();
+            $maxStadId=$msId['master_stadium_id'];
+            if(empty($maxStadId) || $maxStadId==""){
+              $maxStadId=5;
+            }
+            //$matchStatusReward = $rewardLib->getMasterMatchStatusRewardForStadium($this->winStatus, $maxStadiumId);
+            $matchStatusRewardBattleHist = $rewardLib->getMasterMatchStatusRewardForStadiumByTower($bhList['user_winstatus'], $bhList['opponent_circlet'], $maxStadId);
+          }
+          $matchStatusRewardBattleHistOpp = $rewardLib->getMasterMatchStatusRewardForStadiumByTower($bhList['opponent_winstatus'], $bhList['user_circlet'], $bhList['opp_stadium']);
+          if(empty($matchStatusRewardBattleHistOpp) || $matchStatusRewardBattleHistOpp == ""){
+            $oppMsId=$rewardLib->getMaxStadiumIdMasterMatchStatusRewardForStadium();
+            $oppMaxStadId=$oppMsId['master_stadium_id'];
+            if(empty($oppMaxStadId) || $oppMaxStadId==""){
+              $oppMaxStadId=5;
+            }
+            //$matchStatusReward = $rewardLib->getMasterMatchStatusRewardForStadium($this->winStatus, $maxStadiumId);
+            $matchStatusRewardBattleHistOpp = $rewardLib->getMasterMatchStatusRewardForStadiumByTower($bhList['opponent_winstatus'], $bhList['user_circlet'], $oppMaxStadId);
+          }
+          $userTrophies = $matchStatusRewardBattleHist['relics'];
+          //$roomLib->getMatchPlayersTrophies($bhList['user_winstatus'], $bhList['user_stadium']);
+          $opponentTrophies = $matchStatusRewardBattleHistOpp['relics'];
+          //$roomLib->getMatchPlayersTrophies($bhList['opponent_winstatus'], $bhList['opp_stadium']);
           $temp1=array();
           $temp1['room_id'] = $bhList['room_id'];
           //$temp1['user_id'] = $bhList['user_id'];
@@ -55,8 +79,8 @@ class userBattleHistoryDetailsAction extends baseAction{
           $temp1['playerTrophies'] = $bhList['user_trophies'];
           $temp1['opponentTrophies'] = $bhList['opponent_trophies'];
           $temp1['opponentBattleResult'] = $bhList['opponent_winstatus'];
-          $temp1['PlayerBattletrophies'] = $userTrophies;
-          $temp1['opponentBattletrophies'] = $opponentTrophies;
+          $temp1['PlayerBattletrophies'] = !empty($bhList['user_relics_bonus'])?$bhList['user_relics_bonus']:0;
+          $temp1['opponentBattletrophies'] = !empty($bhList['opp_relics_bonus'])?$bhList['opp_relics_bonus']:0;
           $temp1['battleTime'] = $bhList['created_at'];
           //$temp1['battle_player_deck']= json_decode($bhList(['userDeckLst']));
           //$temp1['battle_opp_deck']= json_decode($bhList(['oppDeckLst']));
@@ -66,7 +90,7 @@ class userBattleHistoryDetailsAction extends baseAction{
           //$temp1['battle_players']= json_decode($bhList(['userDeckLst']));
           $temp[] = $temp1; 
         } 
-    }
+    } 
     $result = $temp; 
       
     //$roomId = -1;
